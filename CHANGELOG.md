@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Breaking
+
+- VS Code v1.101.0 and later is now required ([#547](https://github.com/marp-team/marp-vscode/pull/547))
+
+### Changed
+
+- Upgrade Marp Core to [v4.3.0](https://github.com/marp-team/marp-core/releases/tag/v4.3.0) ([#542](https://github.com/marp-team/marp-vscode/pull/542), [#547](https://github.com/marp-team/marp-vscode/pull/547))
+  - [v4.2.0](https://github.com/marp-team/marp-core/releases/v4.2.0): Built-in themes now set color variants based on the color scheme defined by `color-scheme` CSS property
+  - [v4.3.0](https://github.com/marp-team/marp-core/releases/v4.3.0): Added Unicode 17 support by Twemoji
+- Upgrade Marp CLI to [v4.3.0](https://github.com/marp-team/marp-cli/releases/tag/v4.3.0) ([#547](https://github.com/marp-team/marp-vscode/pull/547))
+  - The overview view is avaiable in HTML export
+
 ## v3.3.0 - 2025-08-09
 
 ### Added
