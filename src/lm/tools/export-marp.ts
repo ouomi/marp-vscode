@@ -9,9 +9,7 @@ export interface ExportMarpToolParams {
   outputFilePath: string
 }
 
-export class ExportMarpTool
-  implements vscode.LanguageModelTool<ExportMarpToolParams>
-{
+export class ExportMarpTool implements vscode.LanguageModelTool<ExportMarpToolParams> {
   prepareInvocation({
     input: { inputFilePath, outputFilePath },
   }: vscode.LanguageModelToolInvocationPrepareOptions<ExportMarpToolParams>) {

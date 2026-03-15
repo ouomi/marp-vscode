@@ -2,7 +2,7 @@ import { URI, Utils } from 'vscode-uri'
 
 type MockedConf = Record<string, any>
 
-const defaultVSCodeVersion = 'v1.95.0'
+const defaultVSCodeVersion = 'v1.101.0'
 const defaultConf: MockedConf = {
   'markdown.marp.breaks': 'on',
   'markdown.marp.browser': 'auto',

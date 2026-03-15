@@ -9,7 +9,7 @@ jobs:
   github-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Parse pre-release flag for vsce
         id: vsce-prerelease
@@ -25,9 +25,9 @@ jobs:
     needs: github-release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
 
@@ -45,7 +45,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: ${{ steps.vsix.outputs.name }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: vsix
           path: ${{ steps.vsix.outputs.name }}
@@ -54,13 +54,13 @@ jobs:
     needs: upload-vsix
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Parse pre-release flag for vsce
         id: vsce-prerelease
         run: echo "prerelease=$(cat package.json | jq '.vsce.preRelease')" >> $GITHUB_OUTPUT
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: vsix
           path: ~/vsix
@@ -70,7 +70,7 @@ jobs:
         run: echo "path=$(find ~/vsix -maxdepth 1 -name '*.vsix' -printf '%p\n' | head -n 1)" >> $GITHUB_OUTPUT
 
       - name: Publish to Open VSX Registry
-        uses: HaaLeo/publish-vscode-extension@v1
+        uses: HaaLeo/publish-vscode-extension@v2
         with:
           pat: ${{ secrets.OPEN_VSX_PAT }}
           extensionFile: ${{ steps.vsix.outputs.path }}

@@ -26,7 +26,6 @@ export interface MarpCLIErrorHandler {
 }
 
 export async function createWorkFile(doc: TextDocument): Promise<WorkFile> {
-  // @ts-expect-error `encoding` is available in VS Code 1.100+ (remove this comment when updated the type definition of VS Code)
   const { encoding } = doc
   const encodingAPIavailable = !!encoding
 
@@ -108,9 +107,8 @@ export default async function runMarpCli(
 ): Promise<void> {
   console.info(`Execute Marp CLI [${argv.join(' ')}] (${JSON.stringify(opts)})`)
 
-  const { marpCli, CLIError, CLIErrorCode } = await import(
-    '@marp-team/marp-cli'
-  )
+  const { marpCli, CLIError, CLIErrorCode } =
+    await import('@marp-team/marp-cli')
 
   let exitCode: number
 
