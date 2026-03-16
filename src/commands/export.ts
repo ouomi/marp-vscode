@@ -67,9 +67,14 @@ const chromiumRequiredExtensions = [
   ...extensions.jpeg,
 ] as string[]
 
+const nonHtmlExtname = Object.values(extensions)
+  .flat()
+  .filter((ext) => ext !== 'html')
+  .map((ext) => `.${ext}`)
+
 export interface ExportResult {
   uri: Uri
-  autoOpen?: boolean
+  autoOpen?: boolean | { integratedBrowser?: false | 'tab' | 'window' }
   error?: string
 }
 
@@ -252,12 +257,23 @@ export const doExport = async (
           }
         }
 
-        return {
-          uri,
-          autoOpen:
-            marpConfiguration().get<boolean>('exportAutoOpen') &&
-            outputToLocalFS, // Only local files can open in a relevant application
-        }
+        const autoOpen = (() => {
+          if (!outputToLocalFS) return false // Only local files can open in a relevant application
+          if (!marpConfiguration().get<boolean>('exportAutoOpen')) return false
+
+          // HTML file may open in the integrated browser (Marp CLI treats unexpected extensions as HTML)
+          if (!nonHtmlExtname.includes(outputExt)) {
+            const config = marpConfiguration().get<'off' | 'tab' | 'window'>(
+              'openExportedHtmlInIntegratedBrowser',
+            )
+
+            if (config === 'tab' || config === 'window')
+              return { integratedBrowser: config }
+          }
+          return { integratedBrowser: false } as const
+        })()
+
+        return { uri, autoOpen }
       }
 
       return await runMarpCli({
@@ -316,7 +332,26 @@ export const saveDialog = async (document: TextDocument) => {
     if (result.error) {
       window.showErrorMessage(result.error)
     } else if (result.autoOpen) {
-      env.openExternal(result.uri)
+      if (
+        typeof result.autoOpen === 'object' &&
+        result.autoOpen.integratedBrowser &&
+        (await commands.getCommands(true)).includes(
+          'workbench.action.browser.open',
+        )
+      ) {
+        if (result.autoOpen.integratedBrowser === 'window') {
+          await commands.executeCommand('workbench.action.newEmptyEditorWindow')
+          await commands.executeCommand(
+            'workbench.action.enableCompactAuxiliaryWindow',
+          )
+        }
+        await commands.executeCommand(
+          'workbench.action.browser.open',
+          result.uri.toString(),
+        )
+      } else {
+        env.openExternal(result.uri)
+      }
     } else {
       // Show success message if the auto open was disabled. It includes
       // when the output is not local file: Remote path, Virtual file, etc.
