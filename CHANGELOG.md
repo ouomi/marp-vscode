@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Upgrade Marp CLI to [v4.3.1](https://github.com/marp-team/marp-cli/releases/tag/v4.3.1) ([#548](https://github.com/marp-team/marp-vscode/pull/548))
+  - Fix the collapsed rendering of the overview view in output HTML on Safari
+
 ## v3.4.0 - 2026-03-15
 
 ### Breaking
