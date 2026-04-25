@@ -254,6 +254,18 @@ Enables a diagnostic that warns when slide content overflows the safe area defin
 
 It is helpful for identifying some potential presentation issues, such as cropped content, excessive content on a single page, and an unnatural layouts.
 
+### [`markdown.marp.openExportedHtmlInIntegratedBrowser`](https://github.com/marp-team/marp-vscode/pull/555)
+
+Use [VS Code integrated browser](https://code.visualstudio.com/docs/debugtest/integrated-browser) to open the exported HTML file when `markdown.marp.exportAutoOpen` setting is enabled. It requires VS Code v1.109 and later. This allows users to play presentations in VS Code tabs or external windows.
+
+- `off`: The exported HTML will open in the external browser app.
+- `tab`: The exported HTML will open in VS Code integrated browser as a new tab.
+- `window`: The exported HTML will open in VS Code integrated browser as a new window.
+
+Key features provided by the [Marp CLI `bespoke` template](https://github.com/marp-team/marp-cli#bespoke-template-default), such as [fragmented list](https://marpit.marp.app/fragmented-list) support, presenter view, and [transitions](https://github.com/marp-team/marp-cli/blob/main/docs/bespoke-transitions/README.md), also work in the VS Code integrated browser.
+
+The only exception is full-screen toggle: VS Code denies a permission for the full-screen view. Therefore, _if you are giving a presentation using the entire monitor, you should turn off this setting to use a browser._
+
 ### [`markdown.marp.pptx.editable`](https://github.com/marp-team/marp-vscode/pull/489)
 
 You can enable the experimental feature to export PPTX with editable contents, based on [Marp CLI's corresponding experimental option](https://github.com/marp-team/marp-cli#experimental-generate-editable-pptx---pptx-editable). This feature requires to install both of the compatible browser and [LibreOffice Impress](https://www.libreoffice.org/).

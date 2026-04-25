@@ -191,6 +191,55 @@ describe('#saveDialog', () => {
       expect(env.openExternal).toHaveBeenCalledWith(saveURI)
     })
 
+    it('opens in integrated browser tab when doExport() returns autoOpen config for tab', async () => {
+      exportResult.autoOpen = { integratedBrowser: 'tab' }
+
+      await exportModule.saveDialog(document)
+
+      expect(window.showInformationMessage).not.toHaveBeenCalled()
+      expect(commands.getCommands).toHaveBeenCalledWith(true)
+      expect(commands.executeCommand).toHaveBeenCalledWith(
+        'workbench.action.browser.open',
+        saveURI.toString(),
+      )
+      expect(env.openExternal).not.toHaveBeenCalled()
+    })
+
+    it('opens in integrated browser window when doExport() returns autoOpen config for window', async () => {
+      exportResult.autoOpen = { integratedBrowser: 'window' }
+
+      await exportModule.saveDialog(document)
+
+      expect(commands.executeCommand).toHaveBeenNthCalledWith(
+        1,
+        'workbench.action.newEmptyEditorWindow',
+      )
+      expect(commands.executeCommand).toHaveBeenNthCalledWith(
+        2,
+        'workbench.action.enableCompactAuxiliaryWindow',
+      )
+      expect(commands.executeCommand).toHaveBeenNthCalledWith(
+        3,
+        'workbench.action.browser.open',
+        saveURI.toString(),
+      )
+      expect(env.openExternal).not.toHaveBeenCalled()
+    })
+
+    it('falls back to open in external when doExport() returns autoOpen config for the integrated browser but command is unavailable', async () => {
+      exportResult.autoOpen = { integratedBrowser: 'tab' }
+      ;(commands.getCommands as jest.Mock).mockResolvedValue([])
+
+      await exportModule.saveDialog(document)
+
+      expect(commands.getCommands).toHaveBeenCalledWith(true)
+      expect(commands.executeCommand).not.toHaveBeenCalledWith(
+        'workbench.action.browser.open',
+        saveURI.toString(),
+      )
+      expect(env.openExternal).toHaveBeenCalledWith(saveURI)
+    })
+
     it('shows error message when doExport() returns with error field', async () => {
       exportResult.error = 'ERROR'
 
@@ -466,6 +515,122 @@ describe('#doExport', () => {
         }
       },
     )
+  })
+
+  describe('when set markdown.marp.openExportedHtmlInIntegratedBrowser', () => {
+    let marpCliMock: jest.SpyInstance
+
+    beforeEach(() => {
+      marpCliMock = jest.spyOn(marpCli, 'default').mockImplementation()
+      setConfiguration({ 'markdown.marp.exportAutoOpen': true })
+    })
+
+    afterEach(() => marpCliMock?.mockRestore())
+
+    it('returns autoOpen with integratedBrowser as false while exporting HTML if set as "off"', async () => {
+      setConfiguration({
+        'markdown.marp.openExportedHtmlInIntegratedBrowser': 'off',
+      })
+
+      expect(
+        await exportModule.doExport(saveURI('file', 'html'), document),
+      ).toStrictEqual(
+        expect.objectContaining({ autoOpen: { integratedBrowser: false } }),
+      )
+    })
+
+    it('returns autoOpen with integratedBrowser as "tab" while exporting HTML if set as "tab"', async () => {
+      setConfiguration({
+        'markdown.marp.openExportedHtmlInIntegratedBrowser': 'tab',
+      })
+
+      expect(
+        await exportModule.doExport(saveURI('file', 'html'), document),
+      ).toStrictEqual(
+        expect.objectContaining({ autoOpen: { integratedBrowser: 'tab' } }),
+      )
+    })
+
+    it('returns autoOpen with integratedBrowser as false while exporting non HTML file if set as "tab"', async () => {
+      setConfiguration({
+        'markdown.marp.openExportedHtmlInIntegratedBrowser': 'tab',
+      })
+
+      expect(
+        await exportModule.doExport(saveURI('file', 'pdf'), document),
+      ).toStrictEqual(
+        expect.objectContaining({ autoOpen: { integratedBrowser: false } }),
+      )
+    })
+
+    it('returns autoOpen with false while exporting HTML if set as "tab" but auto open is disabled', async () => {
+      setConfiguration({
+        'markdown.marp.exportAutoOpen': false,
+        'markdown.marp.openExportedHtmlInIntegratedBrowser': 'tab',
+      })
+
+      expect(
+        await exportModule.doExport(saveURI('file', 'html'), document),
+      ).toStrictEqual(expect.objectContaining({ autoOpen: false }))
+    })
+
+    it('returns autoOpen with false while exporting HTML to non-file scheme if set as "tab"', async () => {
+      setConfiguration({
+        'markdown.marp.openExportedHtmlInIntegratedBrowser': 'tab',
+      })
+
+      const isWritableFileSystemMock = jest
+        .spyOn(workspace.fs, 'isWritableFileSystem')
+        .mockReturnValue(true)
+
+      try {
+        expect(
+          await exportModule.doExport(
+            saveURI('unknown-scheme', 'html'),
+            document,
+          ),
+        ).toStrictEqual(expect.objectContaining({ autoOpen: false }))
+      } finally {
+        isWritableFileSystemMock.mockRestore()
+      }
+    })
+
+    it('returns autoOpen with integratedBrowser as "tab" while exporting with unknown extension if set as "tab"', async () => {
+      setConfiguration({
+        'markdown.marp.openExportedHtmlInIntegratedBrowser': 'tab',
+      })
+
+      expect(
+        await exportModule.doExport(saveURI('file', 'unknown'), document),
+      ).toStrictEqual(
+        // Marp CLI treats the output path with unknown extension as HTML, so the result can open in the integrated browser
+        expect.objectContaining({ autoOpen: { integratedBrowser: 'tab' } }),
+      )
+    })
+
+    it('returns autoOpen with integratedBrowser as "window" while exporting HTML if set as "window"', async () => {
+      setConfiguration({
+        'markdown.marp.openExportedHtmlInIntegratedBrowser': 'window',
+      })
+
+      expect(
+        await exportModule.doExport(saveURI('file', 'html'), document),
+      ).toStrictEqual(
+        expect.objectContaining({ autoOpen: { integratedBrowser: 'window' } }),
+      )
+    })
+
+    it('returns autoOpen with integratedBrowser as false while exporting HTML if set as "unknown"', async () => {
+      setConfiguration({
+        'markdown.marp.openExportedHtmlInIntegratedBrowser': 'unknown',
+      })
+
+      expect(
+        await exportModule.doExport(saveURI('file', 'html'), document),
+      ).toStrictEqual(
+        expect.objectContaining({ autoOpen: { integratedBrowser: false } }),
+      )
+    })
   })
 
   describe('when CLI was thrown CLIError with NOT_FOUND_SOFFICE error code', () => {

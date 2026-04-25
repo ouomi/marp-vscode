@@ -146,6 +146,7 @@ export const commands = {
   executeCommand: jest.fn(async () => {
     // no ops
   }),
+  getCommands: jest.fn(async () => ['workbench.action.browser.open']),
   registerCommand: jest.fn(),
 }
 
