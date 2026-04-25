@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Experimental `markdown.marp.openExportedHtmlInIntegratedBrowser` setting to open exported HTML in VS Code's integrated browser ([#555](https://github.com/marp-team/marp-vscode/pull/555))
+
 ## v3.4.1 - 2026-03-16
 
 ### Fixed
