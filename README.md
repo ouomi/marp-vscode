@@ -264,7 +264,7 @@ Use [VS Code integrated browser](https://code.visualstudio.com/docs/debugtest/in
 
 Key features provided by the [Marp CLI `bespoke` template](https://github.com/marp-team/marp-cli#bespoke-template-default), such as [fragmented list](https://marpit.marp.app/fragmented-list) support, presenter view, and [transitions](https://github.com/marp-team/marp-cli/blob/main/docs/bespoke-transitions/README.md), also work in the VS Code integrated browser.
 
-The only exception is full-screen toggle: VS Code denies a permission for the full-screen view.
+The only exception is full-screen toggle: VS Code denies a permission for the full-screen view. Therefore, _if you are giving a presentation using the entire monitor, you should turn off this setting to use a browser._
 
 ### [`markdown.marp.pptx.editable`](https://github.com/marp-team/marp-vscode/pull/489)
 
