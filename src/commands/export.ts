@@ -1,6 +1,7 @@
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { nanoid } from 'nanoid'
+import open from 'open'
 import {
   commands,
   env,
@@ -350,7 +351,20 @@ export const saveDialog = async (document: TextDocument) => {
           result.uri.toString(),
         )
       } else {
-        env.openExternal(result.uri)
+        // `env.openExternal` accepts `Uri` but it tries to spawn with the path including _encoded_ non-ASCII characters
+        // so may fail to open with associated app in Windows.
+        // https://github.com/marp-team/marp-vscode/issues/556
+        // https://github.com/microsoft/vscode/issues/85930
+        // https://github.com/microsoft/vscode/issues/88273
+        if (
+          process.platform === 'win32' &&
+          result.uri.scheme === 'file' &&
+          result.uri.toString().includes('%')
+        ) {
+          await open(result.uri.fsPath)
+        } else {
+          env.openExternal(result.uri)
+        }
       }
     } else {
       // Show success message if the auto open was disabled. It includes
