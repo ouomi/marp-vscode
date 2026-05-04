@@ -1,5 +1,5 @@
 import * as marpCliModule from '@marp-team/marp-cli'
-import open from 'open'
+import { execFile as openFile } from 'node:child_process'
 import { commands, env, window, workspace } from 'vscode'
 import type { Uri } from 'vscode'
 import * as marpCli from '../marp-cli'
@@ -10,7 +10,7 @@ import * as exportModule from './export'
 const exportCommand = exportModule.default
 
 jest.mock('fs')
-jest.mock('open')
+jest.mock('node:child_process')
 jest.mock('vscode')
 jest.mock('../workspace-proxy-server', () => ({
   createWorkspaceProxyServer: jest.fn().mockResolvedValue({
@@ -211,7 +211,10 @@ describe('#saveDialog', () => {
 
         await exportModule.saveDialog(document)
 
-        expect(open).toHaveBeenCalledWith(nonAsciiSaveURI.fsPath)
+        expect(openFile).toHaveBeenCalledWith('rundll32', [
+          'url.dll,FileProtocolHandler',
+          nonAsciiSaveURI.fsPath,
+        ])
         expect(env.openExternal).not.toHaveBeenCalled()
       } finally {
         Object.defineProperty(process, 'platform', { value: originalPlatform })

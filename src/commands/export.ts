@@ -1,7 +1,7 @@
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { nanoid } from 'nanoid'
-import open from 'open'
+import { execFile as openFile } from 'node:child_process'
 import {
   commands,
   env,
@@ -361,7 +361,13 @@ export const saveDialog = async (document: TextDocument) => {
           result.uri.scheme === 'file' &&
           result.uri.toString().includes('%')
         ) {
-          await open(result.uri.fsPath)
+          // Use native rundll32 via Gemini's suggestion to avoid the 'open' module's 
+          // activation crash on Windows (TypeError: File URL path must be absolute).
+          // This approach bypasses ESM-related bundler issues.
+          openFile('rundll32', [
+            'url.dll,FileProtocolHandler',
+            result.uri.fsPath,
+          ])
         } else {
           env.openExternal(result.uri)
         }
